@@ -11,10 +11,11 @@
 
 ;;;;中文字体设定－这里是一部分，还有.Xresources中也有
 ;; 我是近视眼，喜欢大字体。这个pixelsize大多数人是设成13吧。
- (set-frame-font "DejaVu Sans Mono:pixelsize=20")
+ (set-frame-font "Noto Sans CJK SC:pixelsize=20")
   ;; 中文字体的设定，网上很多资料都是gb18030，但我的locale是UTF-8
- (set-fontset-font (frame-parameter nil 'font)
-  'unicode '("WenQuanYi Bitmap Song" . "unicode-bmp"))
+;(set-fontset-font "Noto Sans CJK SC:pixelsize=20")
+; (set-fontset-font (frame-parameter nil 'font)
+;  'unicode '("WenQuanYi Bitmap Song" . "unicode-bmp"))
 
 ;;;;外观设置
 ;;版本24开始改为-1,以前是-1，有的说0，但是测试不行
