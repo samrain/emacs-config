@@ -18,7 +18,7 @@
 (add-to-list 'auto-mode-alist '("\\.markdown\\'". markdown-mode))
 (add-to-list 'auto-mode-alist '("\\.md\\'". markdown-mode))
 
-(add-to-list 'load-path "/home/rain/.emacs.d/ess-13.09-1/lisp/")
+(add-to-list 'load-path "～/.emacs.d/ess-13.09-1/lisp/")
 (require 'ess-site)
 
 ;;;; This snippet enables lua-mode
