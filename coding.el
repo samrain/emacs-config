@@ -18,8 +18,8 @@
 (add-to-list 'auto-mode-alist '("\\.markdown\\'". markdown-mode))
 (add-to-list 'auto-mode-alist '("\\.md\\'". markdown-mode))
 
-(add-to-list 'load-path "～/.emacs.d/ess-13.09-1/lisp/")
-(require 'ess-site)
+;;(add-to-list 'load-path "～/.emacs.d/ess-13.09-1/lisp/")
+;;(require 'ess-site)
 
 ;;;; This snippet enables lua-mode
 ;; This line is not necessary, if lua-mode.el is already on your load-path
