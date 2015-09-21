@@ -1,3 +1,12 @@
+(require 'package) ;; You might already have this line
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/"))
+(when (< emacs-major-version 24)
+  ;; For important compatibility libraries like cl-lib
+  (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/")))
+(package-initialize) ;; You might already have this line
+
+
 ;;load-path就同bash中的$PATH相似，emacs所需要的Elisp包都得在load-path里的文件夹中
 (setq load-path (cons "~/.emacs.d/" load-path))
 
