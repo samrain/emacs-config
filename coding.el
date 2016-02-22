@@ -46,3 +46,23 @@
 ;;;;设置nginx模式
 (require 'nginx-mode)
 
+;;;;;配置org-mode
+(setq load-path (cons "~/.emacs.d/org-8.3.3/lisp" load-path))
+(require 'org-install)
+
+;;;; org 自动换行
+(add-hook 'org-mode-hook (lambda () (setq toggle-truncate-lines nil)))
+;(add-hook 'org-mode-hook (lambda () (setq truncate-lines nil)))
+
+;;;; plantuml
+
+;; active Org-babel languages
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '(;; other Babel languages
+   (plantuml . t)))
+
+(setq org-plantuml-jar-path
+      (expand-file-name "~/.emacs.d/plantuml.jar"))
+
+(add-to-list 'load-path "~/.emacs.d/org-export-blocks-format-plantuml.el")

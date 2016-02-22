@@ -37,7 +37,7 @@
 	     (mouse-wheel-follow-mouse . t)
 	      (mouse-avoidance-mode . 'exile)
 	       ;; face
-	       (font . "文泉驿等宽微米黑 16")
+	       (font . "文泉驿等宽微米黑 12")
 	        )
         ;; if on term
         (nil
@@ -49,12 +49,12 @@
       )
 
 (if (display-graphic-p)
- (set-fontset-font (frame-parameter nil 'font) 'unicode (eval "文泉驿等宽微米黑 16"))
+ (set-fontset-font (frame-parameter nil 'font) 'unicode (eval "文泉驿等宽微米黑 12"))
 )
 
 (load "basic");;基本配置
 (load "coding");;编程用配置
-(load "taosteel");;淘钢工作用配置
+;(load "taosteel");;淘钢工作用配置
 
 ;;必须放在最后,可以保存上次d关闭时的状态，下次启动时恢复状态。
 (load "desktop")
