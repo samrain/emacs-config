@@ -1,3 +1,16 @@
+;;设置 默认目录
+(setq default-directory "~/下载/")  
+  
+(setq default-buffer-file-coding-system 'utf-8)  
+(prefer-coding-system 'utf-8)  
+
+;;==========================================================  
+;; 高亮当前行：hi-line.el,emacs自己带的  
+;;==========================================================  
+(require 'hl-line)  
+(global-hl-line-mode t)  
+
+
 ;;;;color theme
 ;;使用M-x color-theme-select就可以选择配色方案
 ;;在配色方案上按I就可以改变当前frame的配色
@@ -45,7 +58,7 @@
 (setq backup-directory-alist '(("." . "~/backup")))
 ;;备份设置方法，直接拷贝
 (setq backup-by-copying 1)
-(setq make-backup-file-name-function 1)
+;(setq make-backup-file-name-function t)
 
 ;;自动补全功能，从王垠的网站直接Copy过来的，引用一些他对此的说明
 ;;你可以设置以下 hippie-expand 的补全方式。它是一个优先列表， hippie-expand 会优
@@ -160,6 +173,15 @@
 (setq dired-recursive-deletes t) ; 可以递归的删除目录
 (setq dired-recursive-copies t) ; 可以递归的进行拷贝
 (require 'dired-x) ; 有些特殊的功能
+(require 'dired+)
+;;;;设置dired-subtree
+(require 'use-package)
+(use-package dired-subtree :ensure t
+  :after dired
+  :config
+  (bind-key "<tab>" #'dired-subtree-toggle dired-mode-map)
+  (bind-key "<backtab>" #'dired-subtree-cycle dired-mode-map))
+
 (global-set-key "\C-x\C-j" 'dired-jump) ; 通过 C-x C-j 跳转到当前目录的 Dired
 (setq dired-guess-shell-alist-user
 '(("\\.chm$" "xchm")
@@ -171,9 +193,110 @@
   ("\\.htm$" "chromium-browser")
   ("\\.html$" "chromium-browser")
   ("\\.mpg$" "mplayer")
-  ("\\.pdf" "evince"))) ; 设置一些文件的默认打开方式，此功能必须在(require 'dired-x)之后 
+  ("\\.xls$" "et")
+  ("\\.pdf$" "evince"))) ; 设置一些文件的默认打开方式，此功能必须在(require 'dired-x)之后 
 
 
+;; Use 7z and tar to compress/decompress file if possible.
+(defvar yc/dired-compress-file-suffixes
+  (list
+   ;; Regexforsuffix-Programm-Args.
+   (list (rx "." (or "gz" "Z" "z" "dz" "bz2" "xz" "zip" "rar" "7z")) "7z" "x")
+   (list (rx "." (or "tar.gz" "tgz")) "tar" "xzvf")
+   (list (rx "." (or "tar.bz2" "tbz")) "tar" "xjvf")
+   (list (rx ".tar.xz") "tar" "xJvf"))
+  "nil")
+
+(defun yc/dired-check-process (msg program &rest arguments)
+  (let (err-buffer err (dir default-directory))
+    (message "%s..." msg )
+    (save-excursion
+      ;; Get a clean buffer for error output:
+      (setq err-buffer (get-buffer-create " *dired-check-process output*"))
+      (set-buffer err-buffer)
+      (erase-buffer)
+      (setq default-directory dir   ; caller's default-directory
+            err (not (eq 0 (apply 'process-file program nil t nil
+                                  (if (string= "7z" program) "-y" " ") arguments))))
+      (if err
+          (progn
+            (if (listp arguments)
+                (let ((args "") )
+                  (mapc (lambda (X)
+                            (setq args (concat args X " ")))
+                          arguments)
+                  (setq arguments args)))
+            (dired-log (concat program " " (prin1-to-string arguments) "\n"))
+            (dired-log err-buffer)
+            (or arguments program t))
+        (kill-buffer err-buffer)
+        (message "%s...done" msg)
+        nil))))
 
 
+(defun yc/dired-compress-file (file)
+  ;; Compress or uncompress FILE.
+  ;; Return the name of the compressed or uncompressed file.
+  ;; Return nil if no change in files.
+  (let ((handler (find-file-name-handler file 'dired-compress-file))
+        suffix newname
+        (suffixes yc/dired-compress-file-suffixes))
 
+    ;; See if any suffix rule matches this file name.
+    (while suffixes
+      (let (case-fold-search)
+        (if (string-match (car (car suffixes)) file)
+            (setq suffix (car suffixes) suffixes nil))
+        (setq suffixes (cdr suffixes))))
+    ;; If so, compute desired new name.
+    (if suffix
+        (setq newname (substring file 0 (match-beginning 0))))
+    (cond (handler
+           (funcall handler 'dired-compress-file file))
+          ((file-symlink-p file)
+           nil)
+          ((and suffix (nth 1 suffix))
+           ;; We found an uncompression rule.
+           (if
+               (and (or (not (file-exists-p newname))
+                        (y-or-n-p
+                         (format "File %s already exists.  Replace it? "
+                                 newname)))
+                    (not (yc/dired-check-process (concat "Uncompressing " file)
+                                                 (nth 1 suffix) (nth 2 suffix) file)))
+               newname))
+          (t
+           ;;; We don't recognize the file as compressed, so compress it.
+           ;;; Try gzip; if we don't have that, use compress.
+           (condition-case nil
+               (let ((out-name (concat file ".7z")))
+                 (and (or (not (file-exists-p out-name))
+                          (y-or-n-p
+                           (format "File %s already exists.  Really compress? "
+                                   out-name)))
+                      (not (yc/dired-check-process (concat "Compressing " file)
+                                                   "7z" "a" out-name file))
+                      ;; Rename the compressed file to NEWNAME
+                      ;; if it hasn't got that name already.
+                      (if (and newname (not (equal newname out-name)))
+                          (progn
+                            (rename-file out-name newname t)
+                            newname)
+                        out-name))))))))
+
+(defadvice dired-compress (around yc/dired-compress )
+  "If last action was not a yank, run `browse-kill-ring' instead."
+  (let* (buffer-read-only
+         (from-file (dired-get-filename))
+         (new-file (yc/dired-compress-file from-file)))
+    (if new-file
+        (let ((start (point)))
+          ;; Remove any preexisting entry for the name NEW-FILE.
+          (ignore-errors (dired-remove-entry new-file))
+          (goto-char start)
+          ;; Now replace the current line with an entry for NEW-FILE.
+          (dired-update-file-line new-file) nil)
+      (dired-log (concat "Failed to compress" from-file))
+      from-file))
+  )
+(ad-activate 'dired-compress)

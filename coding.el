@@ -47,8 +47,8 @@
 (require 'nginx-mode)
 
 ;;;;;配置org-mode
-(setq load-path (cons "~/.emacs.d/org-8.3.3/lisp" load-path))
-(require 'org-install)
+;(setq load-path (cons "~/.emacs.d/org-8.3.3/lisp" load-path))
+;(require 'org-install)
 
 ;;;; org 自动换行
 (add-hook 'org-mode-hook (lambda () (setq toggle-truncate-lines nil)))
