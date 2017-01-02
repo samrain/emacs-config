@@ -5,11 +5,10 @@
 (prefer-coding-system 'utf-8)  
 
 ;;==========================================================  
-;; 高亮当前行：hi-line.el,emacs自己带的  
+;; 高亮当前行：hi-line.el,emacs自己带的
+;; (require 'hl-line)  
+;; (global-hl-line-mode t)  
 ;;==========================================================  
-(require 'hl-line)  
-(global-hl-line-mode t)  
-
 
 ;;;;color theme
 ;;使用M-x color-theme-select就可以选择配色方案
@@ -300,3 +299,9 @@
       from-file))
   )
 (ad-activate 'dired-compress)
+
+(use-package golden-ratio
+  :ensure t
+  :diminish golden-ratio-mode
+  :init
+  (golden-ratio-mode 1))
